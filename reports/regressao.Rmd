@@ -1,0 +1,116 @@
+---
+  title: "regressão"
+output:
+  html_document:
+  df_print: paged
+theme: sandstone
+---
+  
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+theme_set(theme_bw())
+library(boot)
+library(broom)
+knitr::opts_chunk$set(tidy = FALSE,
+                      fig.width = 6,
+                      fig.height = 5)
+```
+
+```{r read}
+dados = read_tsv(here::here("data/marioKart.txt")) 
+dados = dados %>% filter(totalPr < 118.50)
+glimpse(dados)
+```
+
+
+### Visualização de quantidade de lances (nBids) x Preço vencendor (totalPr)
+
+```{r}
+ggplot(dados, aes(x = nBids, y = totalPr)) + 
+  geom_point(alpha = 0.4, size = 3) 
+ 
+```
+
+
+## Modelo para as variáveis acima
+```{r}
+mod <- lm(totalPr ~ nBids, 
+          data = dados)
+
+mod
+
+summary(mod)
+confint(mod)
+
+ggplot(dados, aes(y = totalPr, x = nBids)) + 
+  geom_point(alpha = 0.4) + 
+  geom_smooth(method = "lm", se = FALSE)
+
+
+```
+
+
+### Relação entre o quanto o preço aumentou x quantidade de lances 
+
+```{r}
+
+dados = dados %>% mutate(diff = totalPr - startPr)
+
+ggplot(dados, aes(x = diff, y = nBids)) + 
+  geom_point(alpha = 0.4) + 
+  geom_smooth(method = "lm", se = FALSE)
+
+mod <- lm(diff ~ nBids, 
+          data = dados)
+
+mod
+
+summary(mod)
+confint(mod)
+
+```
+
+A cada lance o preço sobe em media `1.56`. 
+O quao bem eu consigo explicar a variação? 37%, consegue explicar um pouco melhor que o modelo anterior, pois as variáveis se ajustam melhor. 
+
+
+```{r}
+tidy(mod)
+glance(mod)
+
+tidy(
+  mod,
+  conf.int = TRUE,
+  conf.level = .95)
+
+
+```
+
+```{r}
+
+ggplot(dados, aes(y = totalPr, x = stockPhoto, color = stockPhoto)) + 
+  geom_point(alpha = 0.4)
+
+
+```
+```{r}
+mod <- lm(totalPr ~ stockPhoto, 
+          data = dados)
+
+mod
+
+summary(mod)
+confint(mod)
+```
+
+
+```{r}
+mod <- lm(totalPr ~ cond, 
+          data = dados)
+
+mod
+
+summary(mod)
+confint(mod)
+```
+
